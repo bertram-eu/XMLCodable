@@ -264,6 +264,17 @@ extension XMLKeyedDecodingContainer {
                     }
                 }
             }
+        
+        let intrinsics = container
+            .withShared { keyedBox -> [KeyedBox.Element] in
+                keyedBox.elements[""].map {
+                    if let singleKeyed = $0 as? SingleKeyedBox {
+                        return singleKeyed.element.isNull ? singleKeyed : singleKeyed.element
+                    } else {
+                        return $0
+                    }
+                }
+            }
 
         let attributes = container.withShared { keyedBox in
             key.isInlined ? keyedBox.attributes.values : keyedBox.attributes[key.stringValue]
@@ -307,7 +318,9 @@ extension XMLKeyedDecodingContainer {
             case .attribute?:
                 box = try getAttributeBox(for: type, attributes, key)
             case .element?:
-                box = try getElementBox(for: type, elements, key)
+                box = getElementBox(for: type, elements, key)
+            case .intrinsic:
+                box = intrinsics
             case .elementOrAttribute?:
                 box = try getAttributeOrElementBox(attributes, elements, key)
             default:

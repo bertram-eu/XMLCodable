@@ -259,6 +259,7 @@ open class XMLDecoder {
         /// Decodes a node from either elements of form `<nodeName>value</nodeName>` or attributes
         /// of form `nodeName="value"`, with elements taking priority.
         case elementOrAttribute
+        case intrinsic
     }
 
     /// The strategy to use in encoding encoding attributes. Defaults to `.deferredToEncoder`.

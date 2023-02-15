@@ -123,6 +123,12 @@ struct XMLKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
                 container.elements.append(box, at: oldSelf.converted(key).stringValue)
             }
         }
+        
+        let intrinsicEncoder: (T, Key, Box) throws -> () = { _, key, box in
+            oldSelf.container.withShared { container in
+                container.elements.append(box, at: "")
+            }
+        }
 
         defer {
             self = oldSelf
@@ -133,6 +139,8 @@ struct XMLKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
             try attributeEncoder(value, key, box)
         case .element?:
             try elementEncoder(value, key, box)
+        case .intrinsic:
+            try intrinsicEncoder(value, key, box)
         case .both?:
             try attributeEncoder(value, key, box)
             try elementEncoder(value, key, box)
