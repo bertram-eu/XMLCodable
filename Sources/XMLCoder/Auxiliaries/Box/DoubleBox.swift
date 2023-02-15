@@ -36,7 +36,7 @@ extension DoubleBox: Box {
             return (unboxed > 0.0) ? "INF" : "-INF"
         }
 
-        return unboxed.description
+        return String(format: "%f", unboxed)
     }
 }
 
