@@ -24,7 +24,7 @@ struct DataBox: Equatable {
     }
 
     init?(base64 string: String) {
-        guard let data = Data(base64Encoded: string) else {
+        guard let data = Data(base64Encoded: string, options: .ignoreUnknownCharacters) else {
             return nil
         }
         self.init(data, format: .base64)
