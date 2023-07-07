@@ -318,9 +318,9 @@ extension XMLKeyedDecodingContainer {
             case .attribute?:
                 box = try getAttributeBox(for: type, attributes, key)
             case .element?:
-                box = getElementBox(for: type, elements, key)
-            case .intrinsic:
-                box = intrinsics
+                box = try getElementBox(for: type, elements, key)
+            case .intrinsic?:
+                box = try getElementBox(for: type, intrinsics, key)
             case .elementOrAttribute?:
                 box = try getAttributeOrElementBox(attributes, elements, key)
             default:
