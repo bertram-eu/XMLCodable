@@ -329,6 +329,8 @@ extension XMLKeyedDecodingContainer {
                     box = try getAttributeBox(for: type, attributes, key)
                 case is XMLElementProtocol.Type:
                     box = try getElementBox(for: type, elements, key)
+                case is XMLIntrinsicProtocol.Type:
+                    box = try getElementBox(for: type, intrinsics, key)
                 default:
                     box = try getAttributeOrElementBox(attributes, elements, key)
                 }

@@ -124,7 +124,7 @@ struct XMLKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
             }
         }
         
-        let intrinsicEncoder: (T, Key, Box) throws -> () = { _, key, box in
+        let intrinsicEncoder: (T, Key, Box) throws -> () = { _, _, box in
             oldSelf.container.withShared { container in
                 container.elements.append(box, at: "")
             }
@@ -148,6 +148,8 @@ struct XMLKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
             switch value {
             case is XMLElementProtocol:
                 encodeElement(forKey: key, box: box)
+            case is XMLIntrinsicProtocol:
+                encodeIntrinsicValue(forKey: key, box: box)
             case is XMLAttributeProtocol:
                 try encodeAttribute(value, forKey: key, box: box)
             case is XMLElementAndAttributeProtocol:
@@ -181,6 +183,15 @@ struct XMLKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
     ) {
         container.withShared { container in
             container.elements.append(box, at: self.converted(key).stringValue)
+        }
+    }
+    
+    private mutating func encodeIntrinsicValue(
+        forKey key: Key,
+        box: Box
+    ) {
+        container.withShared { container in
+            container.elements.append(box, at: "")
         }
     }
 
