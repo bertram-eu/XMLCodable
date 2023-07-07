@@ -5,7 +5,10 @@
 //  Created by Benjamin Wetherfield on 6/4/20.
 //
 
-protocol XMLElementProtocol {}
+protocol XMLElementProtocol {
+    var namespacePrefix: String? { get set }
+    var namespaceURI: String? { get set }
+}
 
 /** Property wrapper specifying that a given property should be encoded and decoded as an XML element.
 
@@ -22,9 +25,13 @@ protocol XMLElementProtocol {}
 @propertyWrapper
 public struct Element<Value>: XMLElementProtocol {
     public var wrappedValue: Value
-
-    public init(_ wrappedValue: Value) {
+    public var namespacePrefix: String?
+    public var namespaceURI: String?
+    
+    public init(_ wrappedValue: Value, namespacePrefix: String? = nil, namespaceURI: String? = nil) {
         self.wrappedValue = wrappedValue
+        self.namespacePrefix = namespacePrefix
+        self.namespaceURI = namespaceURI
     }
 }
 

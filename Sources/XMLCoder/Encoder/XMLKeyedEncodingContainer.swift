@@ -139,7 +139,7 @@ struct XMLKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
             try attributeEncoder(value, key, box)
         case .element?:
             try elementEncoder(value, key, box)
-        case .intrinsic:
+        case .intrinsic?:
             try intrinsicEncoder(value, key, box)
         case .both?:
             try attributeEncoder(value, key, box)
@@ -147,16 +147,16 @@ struct XMLKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
         default:
             switch value {
             case is XMLElementProtocol:
-                encodeElement(forKey: key, box: box)
+                encodeElement(value, forKey: key, box: box)
             case is XMLIntrinsicProtocol:
                 encodeIntrinsicValue(forKey: key, box: box)
             case is XMLAttributeProtocol:
                 try encodeAttribute(value, forKey: key, box: box)
             case is XMLElementAndAttributeProtocol:
                 try encodeAttribute(value, forKey: key, box: box)
-                encodeElement(forKey: key, box: box)
+                encodeElement(value, forKey: key, box: box)
             default:
-                encodeElement(forKey: key, box: box)
+                encodeElement(value, forKey: key, box: box)
             }
         }
     }
@@ -177,13 +177,22 @@ struct XMLKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
         }
     }
 
-    private mutating func encodeElement(
+    private mutating func encodeElement<T: Encodable>(
+        _ value: T,
         forKey key: Key,
         box: Box
     ) {
-        container.withShared { container in
-            container.elements.append(box, at: self.converted(key).stringValue)
-        }
+       if let value = value as? XMLElementProtocol, let namespaceURI = value.namespaceURI {
+           container.withShared { container in
+               let namespacePrefix = value.namespacePrefix ?? "n1"
+               let keyedBox = KeyedBox(elements: [("", box)], attributes: [("xmlns:\(namespacePrefix)", StringBox(namespaceURI))])
+               container.elements.append(keyedBox, at: namespacePrefix + ":" + self.converted(key).stringValue)
+           }
+       } else {
+           container.withShared { container in
+               container.elements.append(box, at: self.converted(key).stringValue)
+           }
+       }
     }
     
     private mutating func encodeIntrinsicValue(
