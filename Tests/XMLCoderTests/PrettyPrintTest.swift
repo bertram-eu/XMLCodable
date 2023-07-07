@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 import XCTest
-import XMLCoder
+import XMLCodable
 
 private struct TopContainer: Encodable {
     let nested: NestedContainer

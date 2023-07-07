@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 private struct Container<T: Codable>: Codable {
     let unkeyed: [T]

@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 private struct Foo: Codable {
     var keyedFooBar: String

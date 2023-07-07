@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 class XMLElementTests: XCTestCase {
     func testInitNull() {

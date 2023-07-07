@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 private struct Book: Decodable {
     let title: String

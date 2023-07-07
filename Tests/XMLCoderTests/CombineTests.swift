@@ -15,7 +15,7 @@ import OpenCombine
 #if canImport(Combine) || canImport(OpenCombine)
 import Foundation
 import XCTest
-import XMLCoder
+import XMLCodable
 
 private let xml = """
 <?xml version="1.0" encoding="UTF-8"?>

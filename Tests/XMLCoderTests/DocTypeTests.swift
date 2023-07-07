@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 private let systemXML = """
 <!DOCTYPE si SYSTEM "http://example.com/myService_v1.dtd">

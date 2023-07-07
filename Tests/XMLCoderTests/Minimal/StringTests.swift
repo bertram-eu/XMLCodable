@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 class StringTests: XCTestCase {
     typealias Value = String

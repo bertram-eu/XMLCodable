@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 final class NestingTests: XCTestCase {
     var encoder: XMLEncoder {

@@ -8,7 +8,7 @@
 
 import Foundation
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 private let overlappingKeys = """
 <?xml version="1.0" encoding="UTF-8"?>

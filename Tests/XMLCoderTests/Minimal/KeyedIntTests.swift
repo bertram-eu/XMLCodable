@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 protocol IntegerContainer {
     associatedtype Integer: BinaryInteger

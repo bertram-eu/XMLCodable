@@ -7,7 +7,7 @@
 
 import Foundation
 import XCTest
-import XMLCoder
+import XMLCodable
 
 private struct Book: Codable, Equatable {
     @Attribute var id: Int

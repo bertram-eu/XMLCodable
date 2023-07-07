@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 class UIntBoxTests: XCTestCase {
     typealias Boxed = UIntBox

@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import XMLCoder
+import XMLCodable
 
 final class CDATATest: XCTestCase {
     private struct Container: Codable, Equatable {

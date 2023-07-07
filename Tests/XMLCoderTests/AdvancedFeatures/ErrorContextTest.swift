@@ -8,7 +8,7 @@
 
 import Foundation
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 final class ErrorContextTest: XCTestCase {
     struct Container: Codable {

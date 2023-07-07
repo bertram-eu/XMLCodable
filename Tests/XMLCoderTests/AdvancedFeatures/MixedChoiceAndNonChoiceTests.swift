@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import XMLCoder
+import XMLCodable
 
 private enum AlternateIntOrString: Equatable {
     case alternateInt(Int)

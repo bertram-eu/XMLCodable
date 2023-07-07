@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 class DecimalTests: XCTestCase {
     typealias Value = Decimal

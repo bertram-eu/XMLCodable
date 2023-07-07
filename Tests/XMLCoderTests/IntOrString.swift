@@ -6,7 +6,7 @@
 //  Created by Benjamin Wetherfield on 11/24/19.
 //
 
-import XMLCoder
+import XMLCodable
 
 internal enum IntOrString: Equatable {
     case int(Int)

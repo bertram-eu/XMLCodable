@@ -6,7 +6,7 @@
 //  Created by Vincent Esche on 12/19/18.
 //
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 class IntTests: XCTestCase {
     typealias Value = Int

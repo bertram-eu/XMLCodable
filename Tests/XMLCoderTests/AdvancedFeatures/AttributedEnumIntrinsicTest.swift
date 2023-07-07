@@ -8,7 +8,7 @@
 
 import Foundation
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 let attributedEnumXML = """
 <?xml version="1.0" encoding="UTF-8"?>

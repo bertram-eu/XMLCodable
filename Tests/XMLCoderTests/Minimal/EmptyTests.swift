@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 class EmptyTests: XCTestCase {
     struct Container: Codable, Equatable {

@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import XMLCoder
+import XMLCodable
 
 final class EmptyElementEmptyStringTests: XCTestCase {
     struct ExplicitNestingContainer: Equatable, Decodable {

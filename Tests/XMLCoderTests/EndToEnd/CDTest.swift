@@ -8,7 +8,7 @@
 
 import Foundation
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 private struct CDCatalog: Codable, Equatable {
     var cds: [CD]

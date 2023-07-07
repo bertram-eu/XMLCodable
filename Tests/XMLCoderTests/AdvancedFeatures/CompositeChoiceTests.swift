@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import XMLCoder
+import XMLCodable
 
 private struct IntWrapper: Codable, Equatable {
     let wrapped: Int

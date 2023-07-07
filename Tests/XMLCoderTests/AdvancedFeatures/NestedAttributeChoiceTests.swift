@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import XMLCoder
+import XMLCodable
 
 private struct Container: Equatable {
     let paragraphs: [Paragraph]

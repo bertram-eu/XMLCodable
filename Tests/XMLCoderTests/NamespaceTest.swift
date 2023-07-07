@@ -8,7 +8,7 @@
 
 import Foundation
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 private let tableXML = """
 <h:table xmlns:h="http://www.w3.org/TR/html4/">

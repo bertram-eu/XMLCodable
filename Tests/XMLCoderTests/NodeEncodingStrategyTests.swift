@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 private struct SingleContainer: Encodable {
     let element: Element

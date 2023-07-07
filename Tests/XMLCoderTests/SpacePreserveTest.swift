@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 private let simpleXML = """
 <t xml:space="preserve"> </t>

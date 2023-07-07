@@ -9,7 +9,7 @@
 #if swift(>=5.5)
 
 import XCTest
-import XMLCoder
+import XMLCodable
 
 private struct Container: Equatable {
     let paragraphs: [Paragraph]

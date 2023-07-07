@@ -1,6 +1,6 @@
 import XCTest
 
-import XMLCoderTests
+import XMLCodableTests
 
 var tests = [XCTestCaseEntry]()
 tests += XMLCoderTests.__allTests()

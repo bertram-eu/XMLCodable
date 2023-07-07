@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 private let xml = """
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">

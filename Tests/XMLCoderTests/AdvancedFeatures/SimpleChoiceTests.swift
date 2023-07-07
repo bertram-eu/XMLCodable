@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import XMLCoder
+import XMLCodable
 
 final class SimpleChoiceTests: XCTestCase {
     func testIntOrStringIntDecoding() throws {

@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 private struct ExpectNonNil: Decodable, Equatable {
     var optional: String? = ""

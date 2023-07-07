@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import XMLCoder
+import XMLCodable
 
 final class CDATAMixedUsageTest: XCTestCase {
     private struct DataEntry: Codable, Equatable {

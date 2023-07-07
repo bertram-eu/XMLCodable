@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 class XMLKeyTests: XCTestCase {
     func testInitStringValue() {

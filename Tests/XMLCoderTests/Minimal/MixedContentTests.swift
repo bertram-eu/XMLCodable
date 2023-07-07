@@ -9,7 +9,7 @@
 import Foundation
 
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 class MixedContentTests: XCTestCase {
     enum TextItem: Codable, Equatable {
