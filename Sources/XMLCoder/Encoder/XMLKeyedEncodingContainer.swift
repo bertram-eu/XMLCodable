@@ -182,6 +182,7 @@ struct XMLKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
         forKey key: Key,
         box: Box
     ) {
+       if box is NullBox { return }
        if let value = value as? XMLElementProtocol, let namespaceURI = value.namespaceURI {
            container.withShared { container in
                let namespacePrefix = value.namespacePrefix ?? "n1"

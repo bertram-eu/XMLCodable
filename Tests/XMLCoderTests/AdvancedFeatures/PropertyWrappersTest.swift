@@ -12,11 +12,13 @@ import XMLCodable
 private struct Book: Codable, Equatable {
     @Attribute var id: Int
     @Element var name: String
+    @Element var title: String?
     @ElementAndAttribute var authorID: Int
 
-    init(id: Int, name: String, authorID: Int) {
+    init(id: Int, name: String, title: String? = nil, authorID: Int) {
         _id = Attribute(id)
         _name = Element(name)
+        _title = Element(title)
         _authorID = ElementAndAttribute(authorID)
     }
 }

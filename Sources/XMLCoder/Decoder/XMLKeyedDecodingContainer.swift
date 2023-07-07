@@ -351,6 +351,8 @@ extension XMLKeyedDecodingContainer {
             } else {
                 value = try decoder.unbox(first)
             }
+        } else if box.isNull, let type = type as? XMLOptionalElementProtocol.Type, let nullElement = type.init() as? T {
+            value = nullElement
         } else if box.isNull, let type = type as? XMLOptionalAttributeProtocol.Type, let nullAttribute = type.init() as? T {
             value = nullAttribute
         } else {
@@ -386,7 +388,15 @@ extension XMLKeyedDecodingContainer {
     private func getElementBox<T: Decodable>(for type: T.Type, _ elements: [KeyedBox.Element], _ key: Key) throws -> Box {
         guard elements.isEmpty else { return elements }
         if type is AnyOptional.Type || type is XMLDecodableSequence.Type { return elements }
-
+        
+        if type is Element<AnyOptional>.Type {
+            return elements
+        }
+        
+        if type is ExpressibleByNilLiteral.Type {
+            return NullBox()
+        }
+        
         throw DecodingError.keyNotFound(key, DecodingError.Context(
             codingPath: decoder.codingPath,
             debugDescription: "No element found for key \(_errorDescription(of: key))."

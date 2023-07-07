@@ -47,3 +47,59 @@ extension Element: Codable where Value: Codable {
 
 extension Element: Equatable where Value: Equatable {}
 extension Element: Hashable where Value: Hashable {}
+
+extension Element: ExpressibleByIntegerLiteral where Value: ExpressibleByIntegerLiteral {
+    public typealias IntegerLiteralType = Value.IntegerLiteralType
+
+    public init(integerLiteral value: Value.IntegerLiteralType) {
+        wrappedValue = Value(integerLiteral: value)
+    }
+}
+
+extension Element: ExpressibleByUnicodeScalarLiteral where Value: ExpressibleByUnicodeScalarLiteral {
+    public init(unicodeScalarLiteral value: Value.UnicodeScalarLiteralType) {
+        wrappedValue = Value(unicodeScalarLiteral: value)
+    }
+
+    public typealias UnicodeScalarLiteralType = Value.UnicodeScalarLiteralType
+}
+
+extension Element: ExpressibleByExtendedGraphemeClusterLiteral where Value: ExpressibleByExtendedGraphemeClusterLiteral {
+    public typealias ExtendedGraphemeClusterLiteralType = Value.ExtendedGraphemeClusterLiteralType
+
+    public init(extendedGraphemeClusterLiteral value: Value.ExtendedGraphemeClusterLiteralType) {
+        wrappedValue = Value(extendedGraphemeClusterLiteral: value)
+    }
+}
+
+extension Element: ExpressibleByStringLiteral where Value: ExpressibleByStringLiteral {
+    public typealias StringLiteralType = Value.StringLiteralType
+
+    public init(stringLiteral value: Value.StringLiteralType) {
+        wrappedValue = Value(stringLiteral: value)
+    }
+}
+
+extension Element: ExpressibleByBooleanLiteral where Value: ExpressibleByBooleanLiteral {
+    public typealias BooleanLiteralType = Value.BooleanLiteralType
+
+    public init(booleanLiteral value: Value.BooleanLiteralType) {
+        wrappedValue = Value(booleanLiteral: value)
+    }
+}
+
+extension Element: ExpressibleByNilLiteral where Value: ExpressibleByNilLiteral {
+    public init(nilLiteral: ()) {
+        wrappedValue = Value(nilLiteral: ())
+    }
+}
+
+protocol XMLOptionalElementProtocol: XMLElementProtocol {
+    init()
+}
+
+extension Element: XMLOptionalElementProtocol where Value: AnyOptional {
+    init() {
+        wrappedValue = Value()
+    }
+}
