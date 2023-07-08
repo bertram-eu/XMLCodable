@@ -45,6 +45,14 @@ extension Element: Codable where Value: Codable {
     }
 }
 
+extension Element: XMLDecodableSequence where Value: XMLDecodableSequence {
+    public init() {
+        self.wrappedValue = .init()
+        self.namespacePrefix = nil
+        self.namespaceURI = nil
+    }
+}
+
 extension Element: Equatable where Value: Equatable {}
 extension Element: Hashable where Value: Hashable {}
 

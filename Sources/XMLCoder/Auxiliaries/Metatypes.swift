@@ -18,6 +18,12 @@ extension Array: XMLDecodableSequence {}
 
 extension Dictionary: XMLDecodableSequence {}
 
+extension Optional: XMLDecodableSequence where Wrapped: XMLDecodableSequence {
+    public init() {
+        self = nil
+    }
+}
+
 /// Type-erased protocol helper for a metatype check in generic `decode`
 /// overload.
 protocol AnyOptional {
