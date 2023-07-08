@@ -74,6 +74,18 @@ private let bookComplexXML =
     </Book>
     """
 
+private let bookEmpyAuthorNameXML =
+    """
+    <Book id="42" authorID="24">
+        <name>The Book</name>
+        <title>The Book</title>
+        <authorID>24</authorID>
+        <author mail="me@icloud.com">
+            
+        </author>
+    </Book>
+    """
+
 private let bookAuthorAttributeXML =
     """
     <Book id="42" authorID="24">
@@ -110,6 +122,7 @@ private let libraryElementXML =
 
 private let book = Book(id: 42, name: "The Book", authorID: 24)
 private let bookWithAuthor = Book(id: 42, name: "The Book", title: "The Book", authorID: 24, author: Author(name: "Me", mail: "me@icloud.com"))
+private let bookWithEmptyAuthorName = Book(id: 42, name: "The Book", title: "The Book", authorID: 24, author: Author(name: "", mail: "me@icloud.com"))
 private let library = Library(name: "Mine", books: [book, bookWithAuthor])
 
 final class PropertyWrappersTest: XCTestCase {
@@ -129,6 +142,15 @@ final class PropertyWrappersTest: XCTestCase {
         let xml = try String(data: encoder.encode(bookWithAuthor), encoding: .utf8)
 
         XCTAssertEqual(bookComplexXML, xml)
+    }
+    
+    func testEncodeEmptyTag() throws {
+        let encoder = XMLEncoder()
+        encoder.outputFormatting = .prettyPrinted
+
+        let xml = try String(data: encoder.encode(bookWithEmptyAuthorName), encoding: .utf8)
+
+        XCTAssertEqual(bookEmpyAuthorNameXML, xml)
     }
     
     func testEncodeArray() throws {
@@ -156,6 +178,14 @@ final class PropertyWrappersTest: XCTestCase {
         let decodedBook = try decoder.decode(Book.self, from: Data(bookComplexXML.utf8))
 
         XCTAssertEqual(bookWithAuthor, decodedBook)
+    }
+    
+    func testDecodeEmptyTag() throws {
+        let decoder = XMLDecoder()
+        decoder.removeWhitespaceElements = false
+        let decodedBook = try decoder.decode(Book.self, from: Data(bookEmpyAuthorNameXML.utf8))
+
+        XCTAssertEqual(bookWithEmptyAuthorName, decodedBook)
     }
     
     func testDecodeArray() throws {

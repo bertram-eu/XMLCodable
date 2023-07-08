@@ -320,7 +320,7 @@ extension XMLKeyedDecodingContainer {
             case .element?:
                 box = try getElementBox(for: type, elements, key)
             case .intrinsic?:
-                box = try getElementBox(for: type, intrinsics, key)
+                box = try getIntrinsicBox(for: type, intrinsics, key)
             case .elementOrAttribute?:
                 box = try getAttributeOrElementBox(attributes, elements, key)
             default:
@@ -401,6 +401,10 @@ extension XMLKeyedDecodingContainer {
             codingPath: decoder.codingPath,
             debugDescription: "No element found for key \(_errorDescription(of: key))."
         ))
+    }
+    
+    private func getIntrinsicBox<T: Decodable>(for type: T.Type, _ intrinsics: [KeyedBox.Element], _ key: Key) throws -> Box {
+        return intrinsics
     }
 
     private func getAttributeOrElementBox(_ attributes: [KeyedBox.Attribute], _ elements: [KeyedBox.Element], _ key: Key) throws -> Box {
