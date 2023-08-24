@@ -26,12 +26,18 @@ extension Optional: XMLDecodableSequence where Wrapped: XMLDecodableSequence {
 
 /// Type-erased protocol helper for a metatype check in generic `decode`
 /// overload.
-protocol AnyOptional {
+public protocol AnyOptional {
     init()
+    
+    static var wrappedType: Any.Type { get }
 }
 
 extension Optional: AnyOptional {
-    init() {
+    public init() {
         self = nil
+    }
+    
+    public static var wrappedType: Any.Type {
+        return Wrapped.self
     }
 }

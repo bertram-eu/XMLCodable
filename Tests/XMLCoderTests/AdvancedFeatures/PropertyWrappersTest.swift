@@ -32,14 +32,14 @@ private struct Book: Codable, Equatable {
     @Element var name: String
     @Element var title: String?
     @ElementAndAttribute var authorID: Int
-    @Element var author: Author?
+    @Element @Nullable var author: Author?
 
     init(id: Int, name: String, title: String? = nil, authorID: Int, author: Author? = nil) {
         _id = Attribute(id)
         _name = Element(name)
         _title = Element(title)
         _authorID = ElementAndAttribute(authorID)
-        _author = Element(author)
+        _author = Element(Nullable(author))
     }
 }
 
@@ -83,6 +83,15 @@ private let bookEmpyAuthorNameXML =
         <author mail="me@icloud.com">
             
         </author>
+    </Book>
+    """
+
+private let bookNullAuthorXML =
+    """
+    <Book id="42" authorID="24">
+        <name>The Book</name>
+        <authorID>24</authorID>
+        <author null="true" mail="me@icloud.com"></author>
     </Book>
     """
 
@@ -186,6 +195,14 @@ final class PropertyWrappersTest: XCTestCase {
         let decodedBook = try decoder.decode(Book.self, from: Data(bookEmpyAuthorNameXML.utf8))
 
         XCTAssertEqual(bookWithEmptyAuthorName, decodedBook)
+    }
+    
+    func testDecodeNullTag() throws {
+        let decoder = XMLDecoder()
+        decoder.removeWhitespaceElements = false
+        let decodedBook = try decoder.decode(Book.self, from: Data(bookNullAuthorXML.utf8))
+        
+        XCTAssertEqual(book, decodedBook)
     }
     
     func testDecodeArray() throws {

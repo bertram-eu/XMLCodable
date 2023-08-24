@@ -386,6 +386,16 @@ extension XMLKeyedDecodingContainer {
     }
     
     private func getElementBox<T: Decodable>(for type: T.Type, _ elements: [KeyedBox.Element], _ key: Key) throws -> Box {
+//        if elements.count == 1,
+//           let element = elements.first as? KeyedBox,
+//           element.elements.isEmpty,
+//           element.attributes.count == 1,
+//           (type is AnyOptional.Type || type is XMLOptionalElementProtocol.Type),
+//           let key = element.attributes.keys.first(where: { $0.split(separator: ":").last == "null" }),
+//           let v = element.attributes[key] as? SimpleBox, v.xmlString == "true" {
+//            return NullBox()
+//        }
+//        
         guard elements.isEmpty else { return elements }
         if type is AnyOptional.Type || type is XMLDecodableSequence.Type { return elements }
         

@@ -427,7 +427,15 @@ extension XMLDecoderImplementation {
     func unbox<T: Decodable>(_ box: Box) throws -> T {
         let decoded: T?
         let type = T.self
-
+        
+        if let type = type as? AnyOptional.Type,
+           let box = box as? KeyedBox,
+           box.attributes.contains(where: { $0.0.components(separatedBy: ":").last == "null" && ($0.1 as? StringBox)?.unboxed.lowercased() == "true" }),
+           let element = type.wrappedType.self as? XMLNullableElementProtocol.Type,
+           let result = element.init() as? T {
+            return result
+        }
+        
         if type == Date.self || type == NSDate.self {
             let date: Date = try unbox(box)
             decoded = date as? T
@@ -454,14 +462,18 @@ extension XMLDecoderImplementation {
             do {
                 decoded = try type.init(from: self)
             } catch {
-                guard case DecodingError.valueNotFound = error,
-                      let type = type as? AnyOptional.Type,
-                      let result = type.init() as? T
-                else {
-                    throw error
+                storage.popContainer()
+                if case DecodingError.valueNotFound = error {
+                    if let type = type as? AnyOptional.Type,
+                        let result = type.init() as? T {
+                        return result
+                    } else if let type = type as? XMLOptionalElementProtocol.Type,
+                        let result = type.init() as? T {
+                        return result
+                    }
                 }
 
-                return result
+                throw error
             }
         }
 
