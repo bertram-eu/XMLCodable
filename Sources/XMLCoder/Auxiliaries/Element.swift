@@ -37,11 +37,23 @@ public struct Element<Value>: XMLElementProtocol {
 
 extension Element: Codable where Value: Codable {
     public func encode(to encoder: Encoder) throws {
-        try wrappedValue.encode(to: encoder)
+        if Value.self is AnyOptional.Type {
+            try wrappedValue.encode(to: encoder)
+        } else {
+            let value: Value? = self.wrappedValue
+            try value.encode(to: encoder)
+        }
     }
 
     public init(from decoder: Decoder) throws {
-        try wrappedValue = .init(from: decoder)
+        if Value.self is AnyOptional.Type {
+            try wrappedValue = Value(from: decoder)
+        } else {
+            guard let value = try Value?(from: decoder) else {
+                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Could not decode"))
+            }
+            wrappedValue = value
+        }
     }
 }
 

@@ -13,17 +13,20 @@ private struct Library: Codable, Equatable {
     @Element var name: String
     @Element var books: [Book]?
     @Element var location: String?
+    @Element var website: URL
 
-    init(name: String, books: [Book]? = nil, location: String? = nil) {
+    init(name: String, books: [Book]? = nil, location: String? = nil, website: URL) {
         _name = Element(name)
         _books = Element(books)
         _location = Element(location)
+        _website = Element(website)
     }
 
     public enum CodingKeys: String, CodingKey {
         case name = "name"
         case books = "Book"
         case location = "location"
+        case website = "website"
     }
 }
 
@@ -33,13 +36,15 @@ private struct Book: Codable, Equatable {
     @Element var title: String?
     @ElementAndAttribute var authorID: Int
     @Element @Nullable var author: Author?
+    @Element var releasedOn: Date
 
-    init(id: Int, name: String, title: String? = nil, authorID: Int, author: Author? = nil) {
+    init(id: Int, name: String, title: String? = nil, authorID: Int, author: Author? = nil, releasedOn: Date) {
         _id = Attribute(id)
         _name = Element(name)
         _title = Element(title)
         _authorID = ElementAndAttribute(authorID)
         _author = Element(Nullable(author))
+        _releasedOn = Element(releasedOn)
     }
 }
 
@@ -59,6 +64,7 @@ private let bookAuthorElementAndAttributeXML =
     <Book id="42" authorID="24">
         <name>The Book</name>
         <authorID>24</authorID>
+        <releasedOn>2001-01-01T04:43:20.000Z</releasedOn>
     </Book>
     """
 
@@ -71,6 +77,7 @@ private let bookComplexXML =
         <author mail="me@icloud.com">
             Me
         </author>
+        <releasedOn>2001-01-01T04:43:20.000Z</releasedOn>
     </Book>
     """
 
@@ -83,6 +90,7 @@ private let bookEmpyAuthorNameXML =
         <author mail="me@icloud.com">
             
         </author>
+        <releasedOn>2001-01-01T04:43:20.000Z</releasedOn>
     </Book>
     """
 
@@ -92,6 +100,7 @@ private let bookNullAuthorXML =
         <name>The Book</name>
         <authorID>24</authorID>
         <author null="true" mail="me@icloud.com"></author>
+        <releasedOn>2001-01-01T04:43:20.000Z</releasedOn>
     </Book>
     """
 
@@ -99,6 +108,7 @@ private let bookAuthorAttributeXML =
     """
     <Book id="42" authorID="24">
         <name>The Book</name>
+        <releasedOn>2001-01-01T04:43:20.000Z</releasedOn>
     </Book>
     """
 
@@ -107,6 +117,7 @@ private let bookAuthorElementXML =
     <Book id="42">
         <authorID>24</authorID>
         <name>The Book</name>
+        <releasedOn>2001-01-01T04:43:20.000Z</releasedOn>
     </Book>
     """
 
@@ -117,6 +128,7 @@ private let libraryElementXML =
         <Book id="42" authorID="24">
             <name>The Book</name>
             <authorID>24</authorID>
+            <releasedOn>2001-01-01T04:43:20.000Z</releasedOn>
         </Book>
         <Book id="42" authorID="24">
             <name>The Book</name>
@@ -125,54 +137,83 @@ private let libraryElementXML =
             <author mail="me@icloud.com">
                 Me
             </author>
+            <releasedOn>2001-01-01T04:43:20.000Z</releasedOn>
         </Book>
+        <website>https://www.google.com</website>
     </Library>
     """
 
-private let book = Book(id: 42, name: "The Book", authorID: 24)
-private let bookWithAuthor = Book(id: 42, name: "The Book", title: "The Book", authorID: 24, author: Author(name: "Me", mail: "me@icloud.com"))
-private let bookWithEmptyAuthorName = Book(id: 42, name: "The Book", title: "The Book", authorID: 24, author: Author(name: "", mail: "me@icloud.com"))
-private let library = Library(name: "Mine", books: [book, bookWithAuthor])
+private let releaseDate = Date(timeIntervalSinceReferenceDate: 1000.0 * 17.0)
+private let book = Book(id: 42, name: "The Book", authorID: 24, releasedOn: releaseDate)
+private let bookWithAuthor = Book(id: 42, name: "The Book", title: "The Book", authorID: 24, author: Author(name: "Me", mail: "me@icloud.com"), releasedOn: releaseDate)
+private let bookWithEmptyAuthorName = Book(id: 42, name: "The Book", title: "The Book", authorID: 24, author: Author(name: "", mail: "me@icloud.com"), releasedOn: releaseDate)
+private let library = Library(name: "Mine", books: [book, bookWithAuthor], website: URL(string: "https://www.google.com")!)
 
 final class PropertyWrappersTest: XCTestCase {
-    func testEncode() throws {
+    var decoder: XMLDecoder {
+        let decoder = XMLDecoder()
+        decoder.dateDecodingStrategy = .custom({ decoder -> Date in
+            let c = try decoder.singleValueContainer()
+            let dateString = try c.decode(String.self)
+            guard !dateString.isEmpty else {
+                throw DecodingError.valueNotFound(Date.self, .init(codingPath: decoder.codingPath, debugDescription: "Empty Date"))
+            }
+            let dateFormatter = ISO8601DateFormatter()
+            if dateString.count == 10 {
+                dateFormatter.formatOptions = [.withFullDate, .withDashSeparatorInDate]
+            } else if dateString.count == 27 {
+                dateFormatter.formatOptions = [.withFullDate, .withTime, .withFractionalSeconds, .withColonSeparatorInTime]
+            } else {
+                dateFormatter.formatOptions = [.withInternetDateTime, .withColonSeparatorInTime, .withColonSeparatorInTimeZone, .withFractionalSeconds]
+            }
+            let date = dateFormatter.date(from: dateString)
+            guard date != nil else {
+                throw SOAPError.invalidDate(string: dateString)
+            }
+
+            return date!
+        })
+        return decoder
+    }
+    
+    var encoder: XMLEncoder {
         let encoder = XMLEncoder()
         encoder.outputFormatting = .prettyPrinted
-
+        encoder.dateEncodingStrategy = .custom({ date, encoder in
+            let dateFormatter = ISO8601DateFormatter()
+            dateFormatter.formatOptions = [.withInternetDateTime, .withColonSeparatorInTime, .withColonSeparatorInTimeZone, .withFractionalSeconds]
+            
+            var container = encoder.singleValueContainer()
+            try container.encode(dateFormatter.string(from: date))
+        })
+        return encoder
+    }
+    
+    func testEncode() throws {
         let xml = try String(data: encoder.encode(book), encoding: .utf8)
 
         XCTAssertEqual(bookAuthorElementAndAttributeXML, xml)
     }
     
     func testEncodeComplex() throws {
-        let encoder = XMLEncoder()
-        encoder.outputFormatting = .prettyPrinted
-
         let xml = try String(data: encoder.encode(bookWithAuthor), encoding: .utf8)
 
         XCTAssertEqual(bookComplexXML, xml)
     }
     
     func testEncodeEmptyTag() throws {
-        let encoder = XMLEncoder()
-        encoder.outputFormatting = .prettyPrinted
-
         let xml = try String(data: encoder.encode(bookWithEmptyAuthorName), encoding: .utf8)
 
         XCTAssertEqual(bookEmpyAuthorNameXML, xml)
     }
     
     func testEncodeArray() throws {
-        let encoder = XMLEncoder()
-        encoder.outputFormatting = .prettyPrinted
-        
         let xml = try String(data: encoder.encode(library), encoding: .utf8)
 
         XCTAssertEqual(libraryElementXML, xml)
     }
     
     func testDecode() throws {
-        let decoder = XMLDecoder()
         let decodedBookBoth = try decoder.decode(Book.self, from: Data(bookAuthorElementAndAttributeXML.utf8))
         let decodedBookElement = try decoder.decode(Book.self, from: Data(bookAuthorElementXML.utf8))
         let decodedBookAttribute = try decoder.decode(Book.self, from: Data(bookAuthorAttributeXML.utf8))
@@ -183,39 +224,32 @@ final class PropertyWrappersTest: XCTestCase {
     }
     
     func testDecodeComplex() throws {
-        let decoder = XMLDecoder()
         let decodedBook = try decoder.decode(Book.self, from: Data(bookComplexXML.utf8))
 
         XCTAssertEqual(bookWithAuthor, decodedBook)
     }
     
     func testDecodeEmptyTag() throws {
-        let decoder = XMLDecoder()
-        decoder.removeWhitespaceElements = false
         let decodedBook = try decoder.decode(Book.self, from: Data(bookEmpyAuthorNameXML.utf8))
 
         XCTAssertEqual(bookWithEmptyAuthorName, decodedBook)
     }
     
     func testDecodeNullTag() throws {
-        let decoder = XMLDecoder()
-        decoder.removeWhitespaceElements = false
         let decodedBook = try decoder.decode(Book.self, from: Data(bookNullAuthorXML.utf8))
         
         XCTAssertEqual(book, decodedBook)
     }
     
     func testDecodeArray() throws {
-        let decoder = XMLDecoder()
         let decodedLibrary = try decoder.decode(Library.self, from: Data(libraryElementXML.utf8))
         
         XCTAssertEqual(library, decodedLibrary)
     }
     
     func testDecodeEmptyArray() throws {
-        let decoder = XMLDecoder()
-        let decodedLibrary = try decoder.decode(Library.self, from: Data("<Library><name>Mine</name></Library>".utf8))
+        let decodedLibrary = try decoder.decode(Library.self, from: Data("<Library><name>Mine</name><website>https://www.google.com</website></Library>".utf8))
 
-        XCTAssertEqual(Library(name: "Mine"), decodedLibrary)
+        XCTAssertEqual(Library(name: "Mine", website: URL(string: "https://www.google.com")!), decodedLibrary)
     }
 }
