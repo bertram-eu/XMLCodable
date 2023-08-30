@@ -14,12 +14,14 @@ private struct Library: Codable, Equatable {
     @Element var books: [Book]?
     @Element var location: String?
     @Element var website: URL
+    @Element var logo: Logo?
 
-    init(name: String, books: [Book]? = nil, location: String? = nil, website: URL) {
+    init(name: String, books: [Book]? = nil, location: String? = nil, website: URL, logo: Logo? = nil) {
         _name = Element(name)
         _books = Element(books)
         _location = Element(location)
         _website = Element(website)
+        _logo = Element(logo)
     }
 
     public enum CodingKeys: String, CodingKey {
@@ -27,6 +29,24 @@ private struct Library: Codable, Equatable {
         case books = "Book"
         case location = "location"
         case website = "website"
+        case logo = "logo"
+    }
+}
+
+private struct Logo: Codable, Equatable {
+    @Attribute public var format: String?
+    
+    @Intrinsic public var value: Data
+
+    public enum CodingKeys: String, CodingKey {
+        case format = "format"
+        case value
+    }
+
+    public init(_ value: Data,
+                format: String? = nil) {
+        _format = Attribute(format)
+        _value = Intrinsic(value)
     }
 }
 
@@ -58,6 +78,7 @@ private struct Author: Codable, Equatable {
     }
 }
 
+private let logoData = "Test Data".data(using: .utf8)!
 
 private let bookAuthorElementAndAttributeXML =
     """
@@ -140,18 +161,23 @@ private let libraryElementXML =
             <releasedOn>2001-01-01T04:43:20.000Z</releasedOn>
         </Book>
         <website>https://www.google.com</website>
+        <logo format="plain/text">
+            \(logoData.base64EncodedString())
+        </logo>
     </Library>
     """
 
+private let logo = Logo(logoData, format: "plain/text")
 private let releaseDate = Date(timeIntervalSinceReferenceDate: 1000.0 * 17.0)
 private let book = Book(id: 42, name: "The Book", authorID: 24, releasedOn: releaseDate)
 private let bookWithAuthor = Book(id: 42, name: "The Book", title: "The Book", authorID: 24, author: Author(name: "Me", mail: "me@icloud.com"), releasedOn: releaseDate)
 private let bookWithEmptyAuthorName = Book(id: 42, name: "The Book", title: "The Book", authorID: 24, author: Author(name: "", mail: "me@icloud.com"), releasedOn: releaseDate)
-private let library = Library(name: "Mine", books: [book, bookWithAuthor], website: URL(string: "https://www.google.com")!)
+private let library = Library(name: "Mine", books: [book, bookWithAuthor], website: URL(string: "https://www.google.com")!, logo: logo)
 
 final class PropertyWrappersTest: XCTestCase {
     var decoder: XMLDecoder {
         let decoder = XMLDecoder()
+        decoder.dataDecodingStrategy = .base64
         decoder.dateDecodingStrategy = .custom({ decoder -> Date in
             let c = try decoder.singleValueContainer()
             let dateString = try c.decode(String.self)
@@ -179,6 +205,7 @@ final class PropertyWrappersTest: XCTestCase {
     var encoder: XMLEncoder {
         let encoder = XMLEncoder()
         encoder.outputFormatting = .prettyPrinted
+        encoder.dataEncodingStrategy = .base64
         encoder.dateEncodingStrategy = .custom({ date, encoder in
             let dateFormatter = ISO8601DateFormatter()
             dateFormatter.formatOptions = [.withInternetDateTime, .withColonSeparatorInTime, .withColonSeparatorInTimeZone, .withFractionalSeconds]
