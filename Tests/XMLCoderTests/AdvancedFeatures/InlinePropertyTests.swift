@@ -10,7 +10,7 @@
 
 import Foundation
 import XCTest
-@testable import XMLCoder
+@testable import XMLCodable
 
 private enum InlineChoice: Equatable, Codable {
     case simple(Nested1)

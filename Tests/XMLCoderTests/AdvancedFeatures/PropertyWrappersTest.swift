@@ -194,7 +194,7 @@ final class PropertyWrappersTest: XCTestCase {
             }
             let date = dateFormatter.date(from: dateString)
             guard date != nil else {
-                throw SOAPError.invalidDate(string: dateString)
+                throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "Invalid Date: \(dateString)"))
             }
 
             return date!
