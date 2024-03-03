@@ -33,7 +33,7 @@ struct XMLCoderElement: Equatable {
     }
 
     private var isInlined: Bool {
-        return key.isEmpty
+        return key.isEmpty && elements.count == 1 && elements.first?.key.isEmpty == false
     }
 
     init(
@@ -390,7 +390,18 @@ extension XMLCoderElement {
                 let box = sharedKeyedBox.unboxed
                 elements.append(XMLCoderElement(key: key, isStringBoxCDATA: isCDATA, box: box))
             case let keyedBox as KeyedBox:
-                elements.append(XMLCoderElement(key: key, isStringBoxCDATA: isCDATA, box: keyedBox))
+                if keyedBox.elements.count == 1, keyedBox.elements.keys.first?.isEmpty == true,
+                   let value = keyedBox.elements.values.first {
+                    let attributes: [Attribute] = attributes + keyedBox.attributes.compactMap { key, box in
+                        guard let value = box.xmlString else {
+                            return nil
+                        }
+                        return Attribute(key: key, value: value)
+                    }
+                    elements.append(XMLCoderElement(key: key, isStringBoxCDATA: isCDATA, box: value, attributes: attributes))
+                } else {
+                    elements.append(XMLCoderElement(key: key, isStringBoxCDATA: isCDATA, box: keyedBox))
+                }
             case let simpleBox as SimpleBox:
                 elements.append(XMLCoderElement(key: key, isStringBoxCDATA: isCDATA, box: simpleBox))
             default:
@@ -408,13 +419,13 @@ extension XMLCoderElement {
         self.init(key: key, elements: elements, attributes: attributes)
     }
 
-    init(key: String, isStringBoxCDATA: Bool, box: SimpleBox) {
+    init(key: String, isStringBoxCDATA: Bool, box: SimpleBox, attributes: [Attribute] = []) {
         if isStringBoxCDATA, let stringBox = box as? StringBox {
-            self.init(key: key, cdataValue: stringBox.unboxed)
+            self.init(key: key, cdataValue: stringBox.unboxed, attributes: attributes)
         } else if let value = box.xmlString {
-            self.init(key: key, stringValue: value)
+            self.init(key: key, stringValue: value, attributes: attributes)
         } else {
-            self.init(key: key)
+            self.init(key: key, attributes: attributes)
         }
     }
 
@@ -433,7 +444,7 @@ extension XMLCoderElement {
         case let choiceBox as ChoiceBox:
             self.init(key: key, isStringBoxCDATA: isCDATA, box: choiceBox, attributes: attributes)
         case let simpleBox as SimpleBox:
-            self.init(key: key, isStringBoxCDATA: isCDATA, box: simpleBox)
+            self.init(key: key, isStringBoxCDATA: isCDATA, box: simpleBox, attributes: attributes)
         case let box:
             preconditionFailure("Unclassified box: \(type(of: box))")
         }

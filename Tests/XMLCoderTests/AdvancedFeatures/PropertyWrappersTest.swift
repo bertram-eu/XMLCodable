@@ -71,10 +71,20 @@ private struct Book: Codable, Equatable {
 private struct Author: Codable, Equatable {
     @Intrinsic var name: String
     @Attribute var mail: String
+    @Element var bestseller: Bestseller?
 
-    init(name: String, mail: String) {
+    init(name: String, mail: String, bestseller: Bestseller? = nil) {
         _name = Intrinsic(name)
         _mail = Attribute(mail)
+        _bestseller = Element(bestseller)
+    }
+}
+
+private struct Bestseller: Codable, Equatable {
+    @Intrinsic var title: String
+
+    init(title: String) {
+        _title = Intrinsic(title)
     }
 }
 
@@ -95,8 +105,20 @@ private let bookComplexXML =
         <name>The Book</name>
         <title>The Book</title>
         <authorID>24</authorID>
+        <author mail="me@icloud.com">Me</author>
+        <releasedOn>2001-01-01T04:43:20.000Z</releasedOn>
+    </Book>
+    """
+
+private let bookReallyComplexXML =
+    """
+    <Book id="42" authorID="24">
+        <name>The Book</name>
+        <title>The Book</title>
+        <authorID>24</authorID>
         <author mail="me@icloud.com">
             Me
+            <bestseller>Unknown Title</bestseller>
         </author>
         <releasedOn>2001-01-01T04:43:20.000Z</releasedOn>
     </Book>
@@ -108,9 +130,7 @@ private let bookEmpyAuthorNameXML =
         <name>The Book</name>
         <title>The Book</title>
         <authorID>24</authorID>
-        <author mail="me@icloud.com">
-            
-        </author>
+        <author mail="me@icloud.com"></author>
         <releasedOn>2001-01-01T04:43:20.000Z</releasedOn>
     </Book>
     """
@@ -155,15 +175,11 @@ private let libraryElementXML =
             <name>The Book</name>
             <title>The Book</title>
             <authorID>24</authorID>
-            <author mail="me@icloud.com">
-                Me
-            </author>
+            <author mail="me@icloud.com">Me</author>
             <releasedOn>2001-01-01T04:43:20.000Z</releasedOn>
         </Book>
         <website>https://www.google.com</website>
-        <logo format="plain/text">
-            \(logoData.base64EncodedString())
-        </logo>
+        <logo format="plain/text">\(logoData.base64EncodedString())</logo>
     </Library>
     """
 
@@ -171,6 +187,7 @@ private let logo = Logo(logoData, format: "plain/text")
 private let releaseDate = Date(timeIntervalSinceReferenceDate: 1000.0 * 17.0)
 private let book = Book(id: 42, name: "The Book", authorID: 24, releasedOn: releaseDate)
 private let bookWithAuthor = Book(id: 42, name: "The Book", title: "The Book", authorID: 24, author: Author(name: "Me", mail: "me@icloud.com"), releasedOn: releaseDate)
+private let bookWithAuthorAndBestseller = Book(id: 42, name: "The Book", title: "The Book", authorID: 24, author: Author(name: "Me", mail: "me@icloud.com", bestseller: Bestseller(title: "Unknown Title")), releasedOn: releaseDate)
 private let bookWithEmptyAuthorName = Book(id: 42, name: "The Book", title: "The Book", authorID: 24, author: Author(name: "", mail: "me@icloud.com"), releasedOn: releaseDate)
 private let library = Library(name: "Mine", books: [book, bookWithAuthor], website: URL(string: "https://www.google.com")!, logo: logo)
 
@@ -226,6 +243,12 @@ final class PropertyWrappersTest: XCTestCase {
         let xml = try String(data: encoder.encode(bookWithAuthor), encoding: .utf8)
 
         XCTAssertEqual(bookComplexXML, xml)
+    }
+    
+    func testEncodeReallyComplex() throws {
+        let xml = try String(data: encoder.encode(bookWithAuthorAndBestseller), encoding: .utf8)
+
+        XCTAssertEqual(bookReallyComplexXML, xml)
     }
     
     func testEncodeEmptyTag() throws {
