@@ -36,7 +36,9 @@ extension DoubleBox: Box {
             return (unboxed > 0.0) ? "INF" : "-INF"
         }
 
-        return String(format: "%f", unboxed)
+        var result = String(format: "%f", unboxed)
+        while result.hasSuffix("0"), result.contains(".") { result.removeLast() }
+        return result
     }
 }
 
