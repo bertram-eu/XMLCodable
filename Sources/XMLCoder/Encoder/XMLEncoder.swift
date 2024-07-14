@@ -128,6 +128,8 @@ open class XMLEncoder {
         ///
         /// - Note: Using a key encoding strategy has a nominal performance cost, as each string key has to be converted.
         case convertToSnakeCase
+        
+        case convertToUpperSnakeCase
 
         /// Same as convertToSnakeCase, but using `-` instead of `_`
         /// For example, `oneTwoThree` becomes `one-two-three`.
@@ -157,6 +159,10 @@ open class XMLEncoder {
 
         static func _convertToSnakeCase(_ stringKey: String) -> String {
             return _convert(stringKey, usingSeparator: "_")
+        }
+        
+        static func _convertToUpperSnakeCase(_ stringKey: String) -> String {
+            return _convertToSnakeCase(stringKey).uppercased()
         }
 
         static func _convertToKebabCase(_ stringKey: String) -> String {
@@ -431,6 +437,8 @@ private extension String {
             return self
         case .convertToSnakeCase:
             return XMLEncoder.KeyEncodingStrategy._convertToSnakeCase(self)
+        case .convertToUpperSnakeCase:
+            return XMLEncoder.KeyEncodingStrategy._convertToUpperSnakeCase(self)
         case .convertToKebabCase:
             return XMLEncoder.KeyEncodingStrategy._convertToKebabCase(self)
         case .custom:
