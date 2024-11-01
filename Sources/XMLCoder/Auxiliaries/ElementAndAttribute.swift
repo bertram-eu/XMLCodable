@@ -53,3 +53,4 @@ extension ElementAndAttribute: Codable where Value: Codable {
 
 extension ElementAndAttribute: Equatable where Value: Equatable {}
 extension ElementAndAttribute: Hashable where Value: Hashable {}
+extension ElementAndAttribute: Sendable where Value: Sendable {}

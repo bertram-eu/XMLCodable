@@ -67,6 +67,7 @@ extension Element: XMLDecodableSequence where Value: XMLDecodableSequence {
 
 extension Element: Equatable where Value: Equatable {}
 extension Element: Hashable where Value: Hashable {}
+extension Element: Sendable where Value: Sendable {}
 
 extension Element: ExpressibleByIntegerLiteral where Value: ExpressibleByIntegerLiteral {
     public typealias IntegerLiteralType = Value.IntegerLiteralType

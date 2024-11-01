@@ -52,3 +52,4 @@ extension Intrinsic: Codable where Value: Codable {
 
 extension Intrinsic: Equatable where Value: Equatable {}
 extension Intrinsic: Hashable where Value: Hashable {}
+extension Intrinsic: Sendable where Value: Sendable {}
