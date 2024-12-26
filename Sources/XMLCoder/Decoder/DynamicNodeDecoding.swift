@@ -42,3 +42,45 @@
 public protocol DynamicNodeDecoding: Decodable {
     static func nodeDecoding(for key: CodingKey) -> XMLDecoder.NodeDecoding
 }
+
+extension Array: DynamicNodeDecoding where Element: DynamicNodeDecoding {
+    public static func nodeDecoding(for key: CodingKey) -> XMLDecoder.NodeDecoding {
+        return Element.nodeDecoding(for: key)
+    }
+}
+
+public extension DynamicNodeDecoding where Self: Collection, Self.Iterator.Element: DynamicNodeDecoding {
+    static func nodeDecoding(for key: CodingKey) -> XMLDecoder.NodeDecoding {
+        return Element.nodeDecoding(for: key)
+    }
+}
+
+extension Optional: DynamicNodeDecoding where Wrapped: DynamicNodeDecoding {
+    public static func nodeDecoding(for key: any CodingKey) -> XMLDecoder.NodeDecoding {
+        Wrapped.nodeDecoding(for: key)
+    }
+}
+
+extension Attribute: DynamicNodeDecoding where Value: Encodable & DynamicNodeDecoding {
+    public static func nodeDecoding(for key: any CodingKey) -> XMLDecoder.NodeDecoding {
+        Value.nodeDecoding(for: key)
+    }
+}
+
+extension Element: DynamicNodeDecoding where Value: Encodable & DynamicNodeDecoding {
+    public static func nodeDecoding(for key: any CodingKey) -> XMLDecoder.NodeDecoding {
+        Value.nodeDecoding(for: key)
+    }
+}
+
+extension ElementAndAttribute: DynamicNodeDecoding where Value: Encodable & DynamicNodeDecoding {
+    public static func nodeDecoding(for key: any CodingKey) -> XMLDecoder.NodeDecoding {
+        Value.nodeDecoding(for: key)
+    }
+}
+
+extension Intrinsic: DynamicNodeDecoding where Value: Encodable & DynamicNodeDecoding {
+    public static func nodeDecoding(for key: any CodingKey) -> XMLDecoder.NodeDecoding {
+        Value.nodeDecoding(for: key)
+    }
+}

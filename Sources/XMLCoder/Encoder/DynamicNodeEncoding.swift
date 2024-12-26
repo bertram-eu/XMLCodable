@@ -55,3 +55,33 @@ public extension DynamicNodeEncoding where Self: Collection, Self.Iterator.Eleme
         return Element.nodeEncoding(for: key)
     }
 }
+
+extension Optional: DynamicNodeEncoding where Wrapped: DynamicNodeEncoding {
+    public static func nodeEncoding(for key: any CodingKey) -> XMLEncoder.NodeEncoding {
+        Wrapped.nodeEncoding(for: key)
+    }
+}
+
+extension Attribute: DynamicNodeEncoding where Value: Decodable & DynamicNodeEncoding {
+    public static func nodeEncoding(for key: any CodingKey) -> XMLEncoder.NodeEncoding {
+        Value.nodeEncoding(for: key)
+    }
+}
+
+extension Element: DynamicNodeEncoding where Value: Decodable & DynamicNodeEncoding {
+    public static func nodeEncoding(for key: any CodingKey) -> XMLEncoder.NodeEncoding {
+        Value.nodeEncoding(for: key)
+    }
+}
+
+extension ElementAndAttribute: DynamicNodeEncoding where Value: Decodable & DynamicNodeEncoding {
+    public static func nodeEncoding(for key: any CodingKey) -> XMLEncoder.NodeEncoding {
+        Value.nodeEncoding(for: key)
+    }
+}
+
+extension Intrinsic: DynamicNodeEncoding where Value: Decodable & DynamicNodeEncoding {
+    public static func nodeEncoding(for key: any CodingKey) -> XMLEncoder.NodeEncoding {
+        Value.nodeEncoding(for: key)
+    }
+}

@@ -33,10 +33,10 @@ private struct Library: Codable, Equatable {
     }
 }
 
-private struct Logo: Codable, Equatable {
+private struct Logo: Codable, Equatable, DynamicNodeEncoding, DynamicNodeDecoding {
     @Attribute public var format: String?
     
-    @Intrinsic public var value: Data
+    public var value: Data
 
     public enum CodingKeys: String, CodingKey {
         case format = "format"
@@ -46,7 +46,29 @@ private struct Logo: Codable, Equatable {
     public init(_ value: Data,
                 format: String? = nil) {
         _format = Attribute(format)
-        _value = Intrinsic(value)
+        self.value = value
+    }
+
+    static func nodeEncoding(for key: CodingKey) -> XMLEncoder.NodeEncoding {
+        switch key {
+        case CodingKeys.format:
+            return .attribute
+        case CodingKeys.value:
+            return .intrinsic
+        default:
+            return .element
+        }
+    }
+
+    static func nodeDecoding(for key: CodingKey) -> XMLDecoder.NodeDecoding {
+        switch key {
+        case CodingKeys.format:
+            return .attribute
+        case CodingKeys.value:
+            return .intrinsic
+        default:
+            return .element
+        }
     }
 }
 
