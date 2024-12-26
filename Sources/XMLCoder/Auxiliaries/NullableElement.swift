@@ -55,6 +55,7 @@ extension Nullable: Codable where Value: Codable {
 
 extension Nullable: Equatable where Value: Equatable {}
 extension Nullable: Hashable where Value: Hashable {}
+extension Nullable: Sendable where Value: Sendable {}
 
 extension Nullable: ExpressibleByIntegerLiteral where Value: ExpressibleByIntegerLiteral {
     public typealias IntegerLiteralType = Value.IntegerLiteralType
