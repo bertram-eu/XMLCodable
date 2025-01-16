@@ -22,6 +22,8 @@ class XMLEncoderImplementation: Encoder {
 
     public var nodeEncodings: [(CodingKey) -> XMLEncoder.NodeEncoding?]
 
+    public var nodeNamespaces: [(CodingKey) -> String?]
+
     /// Contextual user-provided information for use during encoding.
     public var userInfo: [CodingUserInfoKey: Any] {
         return options.userInfo
@@ -33,12 +35,14 @@ class XMLEncoderImplementation: Encoder {
     init(
         options: XMLEncoder.Options,
         nodeEncodings: [(CodingKey) -> XMLEncoder.NodeEncoding?],
+        nodeNamespaces: [(CodingKey) -> String?],
         codingPath: [CodingKey] = []
     ) {
         self.options = options
         storage = XMLEncodingStorage()
         self.codingPath = codingPath
         self.nodeEncodings = nodeEncodings
+        self.nodeNamespaces = nodeNamespaces
     }
 
     /// Returns whether a new element can be encoded at this coding path.

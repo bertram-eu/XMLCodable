@@ -243,6 +243,9 @@ open class XMLEncoder {
     public typealias XMLNodeEncoderClosure = (CodingKey) -> NodeEncoding?
     public typealias XMLEncodingClosure = @Sendable (Encodable.Type, Encoder) -> XMLNodeEncoderClosure
 
+    public typealias XMLNodeNamespaceClosure = (CodingKey) -> String?
+    public typealias XMLNamespaceClosure = @Sendable (Encodable.Type, Encoder) -> XMLNodeNamespaceClosure
+
     /// Set of strategies to use for encoding of nodes.
     public enum NodeEncodingStrategy {
         /// Defer to `Encoder` for choosing an encoding. This is the default strategy.
@@ -270,6 +273,24 @@ open class XMLEncoder {
                 return { _ in nil }
             }
             return dynamicType.nodeEncoding(for:)
+        }
+
+        func nodeNamespaces(
+            forType codableType: Encodable.Type,
+            with encoder: Encoder
+        ) -> ((CodingKey) -> String?) {
+            return namespaceClosure(codableType, encoder)
+        }
+
+        var namespaceClosure: XMLNamespaceClosure {
+            return NodeEncodingStrategy.defaultNamespace
+        }
+
+        static let defaultNamespace: XMLNamespaceClosure = { codableType, _ in
+            guard let dynamicType = codableType as? DynamicNamespaceEncoding.Type else {
+                return { _ in nil }
+            }
+            return dynamicType.namespaceURI(for:)
         }
     }
 
@@ -365,8 +386,9 @@ open class XMLEncoder {
                                    header: XMLHeader? = nil,
                                    doctype: XMLDocumentType? = nil) throws -> Data
     {
-        let encoder = XMLEncoderImplementation(options: options, nodeEncodings: [])
+        let encoder = XMLEncoderImplementation(options: options, nodeEncodings: [], nodeNamespaces: [])
         encoder.nodeEncodings.append(options.nodeEncodingStrategy.nodeEncodings(forType: T.self, with: encoder))
+        encoder.nodeNamespaces.append(options.nodeEncodingStrategy.nodeNamespaces(forType: T.self, with: encoder))
 
         let topLevel = try encoder.box(value)
         let attributes = rootAttributes?.map(XMLCoderElement.Attribute.init) ?? []

@@ -94,9 +94,10 @@ struct XMLKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
     ) throws {
         defer {
             _ = self.encoder.nodeEncodings.removeLast()
+            _ = self.encoder.nodeNamespaces.removeLast()
             self.encoder.codingPath.removeLast()
         }
-        guard let strategy = encoder.nodeEncodings.last else {
+        guard let strategy = encoder.nodeEncodings.last, let namespaces = encoder.nodeNamespaces.last else {
             preconditionFailure(
                 "Attempt to access node encoding strategy from empty stack."
             )
@@ -107,6 +108,11 @@ struct XMLKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
             with: encoder
         )
         encoder.nodeEncodings.append(nodeEncodings)
+        let nodeNamespaces = encoder.options.nodeEncodingStrategy.nodeNamespaces(
+            forType: T.self,
+            with: encoder
+        )
+        encoder.nodeNamespaces.append(nodeNamespaces)
         let box = try encode(encoder, value)
 
         let oldSelf = self
@@ -122,12 +128,21 @@ struct XMLKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
             }
         }
 
-        let elementEncoder: (T, Key, Box) throws -> () = { _, key, box in
-            oldSelf.container.withShared { container in
-                container.elements.append(box, at: oldSelf.converted(key).stringValue)
+        let elementEncoder: (T, Key, String?, Box) throws -> () = { _, key, namespace, box in
+            if box is NullBox { return }
+            if let namespace {
+                oldSelf.container.withShared { container in
+                    let namespacePrefix = "n\(String(namespace.reduce(43) { ($0 << 2) &+ $0 &+ UInt16($1.asciiValue ?? 0) }))"
+                    let keyedBox = KeyedBox(elements: [("", box)], attributes: [("xmlns:\(namespacePrefix)", StringBox(namespace))])
+                    container.elements.append(keyedBox, at: namespacePrefix + ":" + oldSelf.converted(key).stringValue)
+                }
+            } else {
+                oldSelf.container.withShared { container in
+                    container.elements.append(box, at: oldSelf.converted(key).stringValue)
+                }
             }
         }
-        
+
         let intrinsicEncoder: (T, Key, Box) throws -> () = { _, _, box in
             oldSelf.container.withShared { container in
                 container.elements.append(box, at: "")
@@ -142,25 +157,25 @@ struct XMLKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
         case .attribute?:
             try attributeEncoder(value, key, box)
         case .element?:
-            try elementEncoder(value, key, box)
+            try elementEncoder(value, key, namespaces(key), box)
         case .intrinsic?:
             try intrinsicEncoder(value, key, box)
         case .both?:
             try attributeEncoder(value, key, box)
-            try elementEncoder(value, key, box)
+            try elementEncoder(value, key, namespaces(key), box)
         default:
             switch value {
             case is XMLElementProtocol:
-                encodeElement(value, forKey: key, box: box)
+                try elementEncoder(value, key, namespaces(key), box)
             case is XMLIntrinsicProtocol:
-                encodeIntrinsicValue(forKey: key, box: box)
+                try intrinsicEncoder(value, key, box)
             case is XMLAttributeProtocol:
                 try encodeAttribute(value, forKey: key, box: box)
             case is XMLElementAndAttributeProtocol:
                 try encodeAttribute(value, forKey: key, box: box)
-                encodeElement(value, forKey: key, box: box)
+                try elementEncoder(value, key, namespaces(key), box)
             default:
-                encodeElement(value, forKey: key, box: box)
+                try elementEncoder(value, key, namespaces(key), box)
             }
         }
     }
@@ -178,34 +193,6 @@ struct XMLKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
         }
         container.withShared { container in
             container.attributes.append(attribute, at: self.converted(key).stringValue)
-        }
-    }
-
-    private mutating func encodeElement<T: Encodable>(
-        _ value: T,
-        forKey key: Key,
-        box: Box
-    ) {
-       if box is NullBox { return }
-       if let value = value as? XMLElementProtocol, let namespaceURI = value.namespaceURI {
-           container.withShared { container in
-               let namespacePrefix = value.namespacePrefix ?? "n1"
-               let keyedBox = KeyedBox(elements: [("", box)], attributes: [("xmlns:\(namespacePrefix)", StringBox(namespaceURI))])
-               container.elements.append(keyedBox, at: namespacePrefix + ":" + self.converted(key).stringValue)
-           }
-       } else {
-           container.withShared { container in
-               container.elements.append(box, at: self.converted(key).stringValue)
-           }
-       }
-    }
-    
-    private mutating func encodeIntrinsicValue(
-        forKey key: Key,
-        box: Box
-    ) {
-        container.withShared { container in
-            container.elements.append(box, at: "")
         }
     }
 

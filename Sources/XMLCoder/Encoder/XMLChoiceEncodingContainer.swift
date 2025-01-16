@@ -93,6 +93,7 @@ struct XMLChoiceEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol 
     ) throws {
         defer {
             _ = self.encoder.nodeEncodings.removeLast()
+            _ = self.encoder.nodeNamespaces.removeLast()
             self.encoder.codingPath.removeLast()
         }
         encoder.codingPath.append(key)
@@ -101,6 +102,11 @@ struct XMLChoiceEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol 
             with: encoder
         )
         encoder.nodeEncodings.append(nodeEncodings)
+        let nodeNamespaces = encoder.options.nodeEncodingStrategy.nodeNamespaces(
+            forType: T.self,
+            with: encoder
+        )
+        encoder.nodeNamespaces.append(nodeNamespaces)
         let box = try encode(encoder, value)
 
         let oldSelf = self

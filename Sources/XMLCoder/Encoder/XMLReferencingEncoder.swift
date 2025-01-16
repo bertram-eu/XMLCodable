@@ -50,6 +50,7 @@ class XMLReferencingEncoder: XMLEncoderImplementation {
         super.init(
             options: encoder.options,
             nodeEncodings: encoder.nodeEncodings,
+            nodeNamespaces: encoder.nodeNamespaces,
             codingPath: encoder.codingPath
         )
 
@@ -68,6 +69,7 @@ class XMLReferencingEncoder: XMLEncoderImplementation {
         super.init(
             options: encoder.options,
             nodeEncodings: encoder.nodeEncodings,
+            nodeNamespaces: encoder.nodeNamespaces,
             codingPath: encoder.codingPath
         )
 
@@ -85,6 +87,7 @@ class XMLReferencingEncoder: XMLEncoderImplementation {
         super.init(
             options: encoder.options,
             nodeEncodings: encoder.nodeEncodings,
+            nodeNamespaces: encoder.nodeNamespaces,
             codingPath: encoder.codingPath
         )
 
